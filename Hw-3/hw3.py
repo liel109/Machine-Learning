@@ -148,12 +148,8 @@ class NaiveNormalClassDistribution():
         sub_data =  dataset[dataset[:,-1] == class_value] # get all rows with the class value
         self.prior = sub_data.shape[0] / dataset.shape[0]
         self.class_value = class_value
-        self.means = []
-        self.stds = []
-        for i in range(sub_data.shape[1]-1):
-            class_data = sub_data[:, i]
-            self.means.append(np.mean(class_data))
-            self.stds.append(np.std(class_data))
+        self.means = np.mean(sub_data[:,:-1],axis=0)
+        self.stds = np.std(sub_data[:,:-1],axis=0)
     
     def get_prior(self):
         """
@@ -165,9 +161,7 @@ class NaiveNormalClassDistribution():
         """
         Returns the likelihhod porbability of the instance under the class according to the dataset distribution.
         """
-        likelihood = 1
-        for i in range(len(x)):
-            likelihood *= normal_pdf(x[i],self.means[i],self.stds[i])
+        likelihood = np.prod(normal_pdf(x,self.means,self.stds), axis=0)
 
         return likelihood
     
