@@ -145,15 +145,11 @@ class NaiveNormalClassDistribution():
         - dataset: The dataset as a 2d numpy array, assuming the class label is the last column
         - class_value : The class to calculate the parameters for.
         """
-        sub_data =  dataset[dataset[:,-1] == class_value]
+        sub_data =  dataset[dataset[:,-1] == class_value] # get all rows with the class value
         self.prior = sub_data.shape[0] / dataset.shape[0]
         self.class_value = class_value
-        self.means = []
-        self.stds = []
-        for i in range(sub_data.shape[1]-1):
-            class_data = sub_data[:, i]
-            self.means.append(np.mean(class_data))
-            self.stds.append(np.std(class_data))
+        self.means = np.mean(sub_data[:,:-1],axis=0)
+        self.stds = np.std(sub_data[:,:-1],axis=0)
     
     def get_prior(self):
         """
@@ -165,9 +161,7 @@ class NaiveNormalClassDistribution():
         """
         Returns the likelihhod porbability of the instance under the class according to the dataset distribution.
         """
-        likelihood = 1
-        for i in range(len(x)):
-            likelihood *= normal_pdf(x[i],self.means[i],self.stds[i])
+        likelihood = np.prod(normal_pdf(x,self.means,self.stds), axis=0)
 
         return likelihood
     
@@ -254,7 +248,7 @@ class MultiNormalClassDistribution():
         - dataset: The dataset as a numpy array
         - class_value : The class to calculate the parameters for.
         """
-        sub_data =  dataset[dataset[:,-1] == class_value]
+        sub_data =  dataset[dataset[:,-1] == class_value] # get all rows with the class value
         self.class_value = class_value        
         self.prior = sub_data.shape[0] / dataset.shape[0]
         self.mean = np.mean(sub_data[:,[0,1]], axis = 0)
@@ -332,7 +326,7 @@ class MaxLikelihood():
         Output
             - 0 if the posterior probability of class 0 is higher and 1 otherwise.
         """
-        if self.ccd0.get_instance_posterior(x) > self.ccd1.get_instance_posterior(x):
+        if self.ccd0.get_instance_likelihood(x) > self.ccd1.get_instance_likelihood(x):
             return self.ccd0.class_value
         return self.ccd1.class_value
 
@@ -348,10 +342,11 @@ class DiscreteNBClassDistribution():
         - dataset: The dataset as a numpy array.
         - class_value: Compute the relevant parameters only for instances from the given class.
         """
-        self.sub_data =  dataset[dataset[:,-1] == class_value]
+        sub_data =  dataset[dataset[:,-1] == class_value] # get all rows with the class value
+        self.dataset = dataset
         self.class_value = class_value
-        self.prior = self.sub_data.shape[0] / dataset.shape[0]
-        self.Vj_array = np.apply_along_axis(lambda col: len(np.unique(col)), axis=0, arr=dataset)
+        self.prior = sub_data.shape[0] / dataset.shape[0]
+        self.Vj_array = np.apply_along_axis(lambda col: len(np.unique(col)), axis=0, arr=dataset) # number of unique values in each column
     
     def get_prior(self):
         """
@@ -365,11 +360,14 @@ class DiscreteNBClassDistribution():
         Returns the likelihood of the instance under 
         the class according to the dataset distribution.
         """
-
-        matching_features_arr = [np.sum(self.sub_data[:,i] == val) for i,val in enumerate(x)]
+        sub_data =  self.dataset[self.dataset[:,-1] == self.class_value] # get all rows with the class value
+        matching_features_arr = [np.sum(sub_data[:,i] == val) for i,val in enumerate(x)] # number of instances with the same feature values as x
         likelihood = 1
         for i,n_i_j in enumerate(matching_features_arr):
-            likelihood *= (n_i_j + 1) / (self.sub_data.shape[0] + self.Vj_array[i]) 
+            if any(self.dataset[:,i] == x[i]):
+                likelihood *= (n_i_j + 1) / (sub_data.shape[0] + self.Vj_array[i]) 
+            else:
+                likelihood *= EPSILLON
         return likelihood
         
     def get_instance_posterior(self, x):
@@ -419,7 +417,7 @@ class MAPClassifier_DNB():
             - Accuracy = #Correctly Classified / #test_set size
         """
         real = test_set[:,-1]
-        pred = np.apply_along_axis(self.predict, axis = 1,arr = test_set[:,:-1])
+        pred = np.apply_along_axis(self.predict, axis = 1,arr = test_set[:,:-1]) # predict each instance
         correct_count = np.count_nonzero(np.equal(real,pred))
         return correct_count / test_set.shape[0]
 
