@@ -22,7 +22,7 @@ class LogisticRegressionGD(object):
         self.n_iter = n_iter
         self.eps = eps
         self.random_state = random_state
-
+        
         # model parameters
         self.theta = None
 
@@ -55,16 +55,15 @@ class LogisticRegressionGD(object):
         self.theta = np.random.random(X.shape[1])
         
         for i in range(self.n_iter):
-              
           sigmoid = self.sigmoid(X.dot(self.theta))
           gradient = self.eta * (X.T.dot(sigmoid - y))
           self.theta = self.theta - gradient
           self.thetas.append(self.theta)
           self.Js.append(self.cost_function(sigmoid, y))
+          
           if i > 1 and (self.Js[-2] - self.Js[-1]) < self.eps:
             break
-        # print(self.Js)
-
+          
     def predict(self, X):
         """
         Return the predicted class labels for a given instance.
@@ -74,7 +73,8 @@ class LogisticRegressionGD(object):
         """
         X = self.apply_bias_trick(X)
         h_x = self.sigmoid(X.dot(self.theta))
-        preds = np.where(h_x > 0.5, 1,0)
+        preds = np.where(h_x >= 0.5, 1,0)
+        
         return preds
     
     def sigmoid(self, X):
@@ -82,11 +82,9 @@ class LogisticRegressionGD(object):
     
     def cost_function(self, h, y):
         m = h.shape[0]
-
-        #cost = -np.mean(y * np.log(h) + (1-y) * np.log(1-h))
+        
         return (y.dot(np.log(h)) + (1-y).dot(np.log(1-h))) / -m
 
-    
     def apply_bias_trick(self, X):
       """
       Applies the bias trick to the input data.
@@ -99,9 +97,9 @@ class LogisticRegressionGD(object):
           zeroth position (m instances over n+1 features).
       """
       ones_matrix = np.ones(X.shape[0]) # create a vector of ones
+      
       return np.column_stack((ones_matrix, X))
     
-
 def cross_validation(X, y, folds, algo, random_state):
     """
     This function performs cross validation as seen in class.
@@ -163,6 +161,7 @@ def norm_pdf(data, mu, sigma):
     Returns the normal distribution pdf according to the given mu and sigma for the given x.    
     """
     p = (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(data - mu)**2 /(2 * (sigma**2)))
+    
     return p
 
 class EM(object):
@@ -200,18 +199,12 @@ class EM(object):
         """
         Initialize distribution params
         """
-        # self.weights = np.ones(self.k) / self.k
-        # self.mus = np.array([-4,6])
-        # self.sigmas = np.array([1.5,2])
-
-        # initialize weights to be all equal
         self.weights = np.ones(self.k) / self.k
 
         # initialize mus by selecting random data points
         random_indices = np.random.choice(len(data), self.k, replace=False)
         self.mus = data[random_indices]
 
-        # initialize sigmas to be the standard deviation of the data
         self.sigmas = np.full(self.k, np.std(data))
 
     def expectation(self, data):
@@ -234,6 +227,7 @@ class EM(object):
         self.mus = (1 / (data.shape[0] * self.weights)) * (self.responsibilities.T.dot(data).flatten())
         for i in range(self.k):
             self.sigmas[i] = self.responsibilities.T[i].dot((data - self.mus[i])**2)
+            
         self.sigmas = np.sqrt((1 / (data.shape[0] * self.weights)) * self.sigmas)
 
     def fit(self, data):
@@ -253,6 +247,7 @@ class EM(object):
           for d in range(data.shape[0]):
               cost -= np.log2(gmm_pdf(data[d], self.weights,self.mus, self.sigmas))
               pass
+            
           self.costs.append(cost)          
           if i>1 and (self.costs[-2] - self.costs[-1]) < self.eps:
               break 
@@ -276,6 +271,7 @@ def gmm_pdf(data, weights, mus, sigmas):
     """
     k = len(weights)
     pdf = sum(weights[j] * norm_pdf(data, mus[j], sigmas[j]) for j in range(k))
+    
     return pdf
 
 class NaiveBayesGaussian(object):
@@ -295,6 +291,7 @@ class NaiveBayesGaussian(object):
         self.random_state = random_state
         self.prior = {}
         self.dist_params = {}
+        
 
     def fit(self, X, y):
         """
