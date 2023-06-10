@@ -200,8 +200,18 @@ class EM(object):
         """
         Initialize distribution params
         """
+        # self.weights = np.ones(self.k) / self.k
+        # self.mus = np.array([-4,6])
+        # self.sigmas = np.array([1.5,2])
+
+        # initialize weights to be all equal
         self.weights = np.ones(self.k) / self.k
-        self.mus = np.random.random(self.k)
+
+        # initialize mus by selecting random data points
+        random_indices = np.random.choice(len(data), self.k, replace=False)
+        self.mus = data[random_indices]
+
+        # initialize sigmas to be the standard deviation of the data
         self.sigmas = np.full(self.k, np.std(data))
 
     def expectation(self, data):
@@ -223,8 +233,8 @@ class EM(object):
         self.weights = np.mean(self.responsibilities, axis = 0)
         self.mus = (1 / (data.shape[0] * self.weights)) * (self.responsibilities.T.dot(data).flatten())
         for i in range(self.k):
-            self.sigmas[i] = self.responsibilities.T[i].dot(data - self.mus[i])
-        self.sigmas = (1 / (data.shape[0] * self.weights)) * self.sigmas
+            self.sigmas[i] = self.responsibilities.T[i].dot((data - self.mus[i])**2)
+        self.sigmas = np.sqrt((1 / (data.shape[0] * self.weights)) * self.sigmas)
 
     def fit(self, data):
         """
@@ -237,24 +247,15 @@ class EM(object):
         """        
         self.init_params(data)
         for i in range(self.n_iter):  
-          if i>1 and (self.costs[-2] - self.costs[-1]) < self.eps:
-              break 
           self.expectation(data)
           self.maximization(data)
-          cost = self.compute_cost(data)
-          print(cost)
-          self.costs.append(cost)
-          # for d in range(data.shape[0]):
-          #     cost -= np.log2(sum(self.weights[j] * norm_pdf(data[d], self.mus[j], self.sigmas[j]) for j in range(self.k)))
-          #     pass
-
-    def compute_cost(self, data):
-      cost = 0
-      for x in data:
-          likelihood = sum(self.weights[k] * norm_pdf(x, self.mus[k], self.sigmas[k]) for k in range(self.k))
-          cost += -np.log2(likelihood)
-          
-      return cost
+          cost=0
+          for d in range(data.shape[0]):
+              cost -= np.log2(gmm_pdf(data[d], self.weights,self.mus, self.sigmas))
+              pass
+          self.costs.append(cost)          
+          if i>1 and (self.costs[-2] - self.costs[-1]) < self.eps:
+              break 
 
     def get_dist_params(self):
         return self.weights, self.mus, self.sigmas
@@ -273,14 +274,8 @@ def gmm_pdf(data, weights, mus, sigmas):
     Returns the GMM distribution pdf according to the given mus, sigmas and weights
     for the given data.    
     """
-    pdf = None
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    k = len(weights)
+    pdf = sum(weights[j] * norm_pdf(data, mus[j], sigmas[j]) for j in range(k))
     return pdf
 
 class NaiveBayesGaussian(object):
@@ -298,7 +293,8 @@ class NaiveBayesGaussian(object):
     def __init__(self, k=1, random_state=1991):
         self.k = k
         self.random_state = random_state
-        self.prior = None
+        self.prior = {}
+        self.dist_params = {}
 
     def fit(self, X, y):
         """
@@ -311,14 +307,15 @@ class NaiveBayesGaussian(object):
           n_features is the number of features.
         y : array-like, shape = [n_examples]
           Target values.
-        """
-        ###########################################################################
-        # TODO: Implement the function.                                           #
-        ###########################################################################
-        pass
-        ###########################################################################
-        #                             END OF YOUR CODE                            #
-        ###########################################################################
+        """        
+        for data_class in np.unique(y):
+          self.dist_params[data_class] = []
+          sub_data =  X[y == data_class]
+          self.prior[data_class] = sub_data.shape[0] / X.shape[0]
+          for j in range(sub_data.shape[1]):
+              em = EM(self.k, random_state = self.random_state)
+              em.fit(sub_data[:,j])
+              self.dist_params[data_class].append(em.get_dist_params())
 
     def predict(self, X):
         """
@@ -327,15 +324,18 @@ class NaiveBayesGaussian(object):
         ----------
         X : {array-like}, shape = [n_examples, n_features]
         """
-        preds = None
-        ###########################################################################
-        # TODO: Implement the function.                                           #
-        ###########################################################################
-        pass
-        ###########################################################################
-        #                             END OF YOUR CODE                            #
-        ###########################################################################
-        return preds
+        postiriors_matrix = np.zeros((X.shape[0], 0))
+        for data_class in self.prior.keys():
+            column_posterior = np.ones(X.shape[0])
+            for j in range(X.shape[1]):
+              column_posterior *= gmm_pdf(X[:,j], *self.dist_params[data_class][j])
+            column_posterior *= self.prior[data_class]
+            column_posterior = column_posterior.reshape((-1,1))
+            postiriors_matrix = np.hstack((postiriors_matrix, column_posterior))
+        
+        preds = np.argmax(postiriors_matrix,axis=1)
+
+        return np.array(preds)
 
 def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     ''' 
@@ -366,18 +366,24 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     lor_test_acc = None
     bayes_train_acc = None
     bayes_test_acc = None
+    
+    lor = LogisticRegressionGD(eta= best_eta, eps = best_eps)
+    lor.fit(x_train, y_train)
+    lor_train_acc = compute_accuracy(lor.predict(x_train), y_train)
+    lor_test_acc = compute_accuracy(lor.predict(x_test), y_test)
 
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    bayes = NaiveBayesGaussian(k)
+    bayes.fit(x_train, y_train)
+    bayes_train_acc = compute_accuracy(bayes.predict(x_train),y_train)
+    bayes_test_acc = compute_accuracy(bayes.predict(x_test),y_test)
+
     return {'lor_train_acc': lor_train_acc,
             'lor_test_acc': lor_test_acc,
             'bayes_train_acc': bayes_train_acc,
             'bayes_test_acc': bayes_test_acc}
+
+def compute_accuracy(preds_vector, actual_classes):
+    return np.mean(preds_vector == actual_classes)
 
 def generate_datasets():
     from scipy.stats import multivariate_normal
@@ -390,13 +396,26 @@ def generate_datasets():
     dataset_a_labels = None
     dataset_b_features = None
     dataset_b_labels = None
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    
+    gaussian1_class0 = multivariate_normal([10,0,0], 2*np.eye(3)).rvs(500)
+    gaussian2_class0 = multivariate_normal([-15,2,0], np.eye(3)).rvs(500)
+
+    gaussian1_class1 = multivariate_normal([0,-4,0], 3*np.eye(3)).rvs(500)
+    gaussian2_class1 = multivariate_normal([5,6,0], 1.5*np.eye(3)).rvs(500)
+
+    dataset_a_features = np.vstack([gaussian1_class0,gaussian2_class0,gaussian1_class1,gaussian2_class1])
+    dataset_a_labels = np.hstack([np.zeros(1000),np.ones(1000)])
+
+    gaussian1 = multivariate_normal([1.5,1.5,0], [[1,0.8,0.8],
+                                             [0.8,1,0.8],
+                                             [0.8,0.8,1]]).rvs(1000)
+    gaussian2 = multivariate_normal([0,0,0], [[1,0.8,0.8],
+                                              [0.8,1,0.8],
+                                              [0.8,0.8,1]]).rvs(1000)
+
+    dataset_b_features = np.vstack([gaussian1,gaussian2])
+    dataset_b_labels = np.hstack([np.zeros(1000),np.ones(1000)])
+
     return{'dataset_a_features': dataset_a_features,
            'dataset_a_labels': dataset_a_labels,
            'dataset_b_features': dataset_b_features,
