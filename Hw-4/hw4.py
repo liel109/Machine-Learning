@@ -401,7 +401,7 @@ def generate_datasets():
     gaussian2_class0 = multivariate_normal([-15,2,0], np.eye(3)).rvs(500)
 
     gaussian1_class1 = multivariate_normal([0,-4,0], 3*np.eye(3)).rvs(500)
-    gaussian2_class1 = multivariate_normal([5,6,0], 1.5*np.eye(3)).rvs(500)
+    gaussian2_class1 = multivariate_normal([5,20,0], 1.5*np.eye(3)).rvs(500)
 
     dataset_a_features = np.vstack([gaussian1_class0,gaussian2_class0,gaussian1_class1,gaussian2_class1])
     dataset_a_labels = np.hstack([np.zeros(1000),np.ones(1000)])
