@@ -13,7 +13,7 @@ def get_random_centroids(X, k):
     centroids = X[random_indices]
     return np.asarray(centroids).astype(np.float)
 
-def minkowski_distance(X, centroids, p=2):
+def calculate_lp_distance(X, centroids, p=2):
     return (np.sum((np.absolute((X-centroids)))**p, axis=1)**(1/p)).T
 
 def lp_distance(X, centroids, p=2):
@@ -26,7 +26,7 @@ def lp_distance(X, centroids, p=2):
     output: numpy array of shape `(k, num_pixels)` thats holds the distances of 
     all points in RGB space from all centroids
     '''
-    distances = np.array([minkowski_distance(X, c, p) for c in centroids])
+    distances = np.array([calculate_lp_distance(X, c, p) for c in centroids])
     return distances
 
 def kmeans_calculation(X, centroids, p, max_iter):
@@ -36,7 +36,7 @@ def kmeans_calculation(X, centroids, p, max_iter):
         prev_centroids = np.copy(centroids)
         classes = np.argmin(lp_distance(X,centroids, p), axis=0)
         centroids = np.array([np.mean(X[classes==j], axis=0) for j in range(k)])
-        if(np.array_equal(centroids, prev_centroids)):
+        if np.array_equal(centroids, prev_centroids):
             break
     
     return centroids, classes
@@ -55,16 +55,6 @@ def kmeans(X, k, p ,max_iter=100):
     """
     centroids = get_random_centroids(X, k)
     return kmeans_calculation(X,centroids,p,max_iter)
-    # classes = []
-    # centroids = get_random_centroids(X, k)
-    # prev_centroids = []
-    # for i in range(max_iter):
-    #     prev_centroids = np.copy(centroids)
-    #     classes = np.argmin(lp_distance(X,centroids, p), axis=0)
-    #     centroids = np.array([np.mean(X[classes==j], axis=0) for j in range(k)])
-    #     if(np.array_equal(centroids, prev_centroids)):
-    #         break
-    # return centroids, classes
 
 def kmeans_pp(X, k, p ,max_iter=100):
     """
@@ -93,6 +83,8 @@ def kmeans_pp(X, k, p ,max_iter=100):
         centroids = np.vstack((centroids, X_copy[chosen_centroid]))
         X_copy = np.delete(X_copy, chosen_centroid, axis=0)
 
-    print(centroids.shape)
-
     return kmeans_calculation(X,centroids,p,max_iter)
+
+def inertia(X, classes, centroids, p=2):
+    k = centroids.shape[0]
+    return np.sum([np.sum(calculate_lp_distance(X[classes==j], centroids[j], p)**p, axis=0) for j in range(k)])
