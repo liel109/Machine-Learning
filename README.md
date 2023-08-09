@@ -1,0 +1,46 @@
+# Machine Learning Projects Repository
+
+Welcome to the Machine Learning Projects Repository! This repository contains a collection of projects focused on various machine learning techniques. Each project is organized into separate directories based on the specific technique used. Feel free to explore, learn, and contribute to these projects.
+
+## Directory Structure
+
+- [Clustering](./Clustering): This directory contains projects related to clustering techniques, which involve grouping similar data points together.
+- [Linear Regression](./Linear_Regression): Here, you'll find projects centered around linear regression, a method to model the relationship between variables using a linear equation.
+- [Logistic Regression](./Logistic_Regression): Explore projects that utilize logistic regression, a technique commonly used for binary classification problems.
+- [MAP Classifier](./MAP_Classifier): In this directory, you'll encounter projects related to Maximum A Posteriori (MAP) classification, which is used to assign labels to data points based on prior knowledge.
+- [Decision Trees](./Decision_Trees): This directory contains projects that focus on decision tree-based algorithms, which create models in the form of trees to make decisions.
+
+## Projects
+
+### Clustering
+
+1. **Color Image Quantization using K-means Clustering**
+   Description: This project focuses on color image quantization, a process that reduces the number of colors in an image while maintaining visual quality. The K-means clustering algorithm is employed to group similar colors together, effectively creating a smaller palette. The project involves loading a true color image, extracting RGB values for each pixel, and applying K-means clustering to determine the dominant colors. Pixels are assigned to their nearest cluster centroid, and the image is reconstructed using the centroid colors. The original and quantized images are compared to evaluate compression effectiveness. Users can adjust the number of clusters, k, to control the level of color reduction. The project aims to showcase the application of K-means clustering in image compression, opening avenues for exploration of different distance metrics and other quantization algorithms. Contributors are welcome to experiment, improve, and learn from this project to enhance color image quantization techniques.
+
+### Linear Regression
+
+1. **House Price Prediction using Linear Regression**
+   Description: This project focuses on predicting house prices using the linear regression algorithm. The goal is to create a model that can estimate the price of a house based on various features such as square footage, number of bedrooms, location, and other relevant attributes. Linear regression is employed as the predictive model, where the relationship between the input features and the target variable (house price) is modeled as a linear equation. The dataset used for training and testing the model contains historical housing data, including both features and actual sale prices. The project involves data preprocessing, including handling missing values, feature scaling, and encoding categorical variables. The linear regression model is trained using the training data and evaluated using metrics such as Mean Squared Error (MSE) or Root Mean Squared Error (RMSE) on the test data. Visualization techniques may be employed to illustrate the model's predictions against the actual prices. The ultimate aim of the project is to create a reliable house price prediction model that can assist in real estate decisions, investment strategies, and property valuations. Contributors to this project can explore enhancements like feature selection, regularization techniques, and other regression algorithms to improve prediction accuracy and model robustness. This project serves as a valuable resource for those looking to learn about predictive modeling, linear regression, and real-world application of machine learning in the real estate domain.
+
+### Logistic Regression
+
+1. **Comparison of Linearly Separable and Non-linearly Separable Data using Logistic Regression and Bayesian Learning**
+   Description: This project aims to explore and compare the performance of Logistic Regression and Bayesian learning techniques on datasets with different levels of separability. The project is divided into two main parts: one focusing on linearly separable data and the other on non-linearly separable data.
+
+   Part 1: Linearly Separable Data
+   In this section, synthetic or real-world datasets with linear separability are utilized. Linear Logistic Regression is employed to model the decision boundary that best separates the classes. The project involves data preprocessing, model training, and evaluation. Performance metrics like accuracy, precision, recall, and F1-score are computed to assess the model's performance on the test data. Visualization techniques, such as plotting the decision boundary and confusion matrices, are used to aid in understanding the model's behavior.
+
+   Part 2: Non-linearly Separable Data
+   Here, datasets with complex relationships between classes are used. The limitations of Linear Logistic Regression in capturing non-linear patterns become apparent. To address this, Bayesian learning techniques, such as Naive Bayes or Gaussian Naive Bayes, are implemented. These algorithms can better capture non-linear relationships between features and classes. Data preprocessing, model training, and evaluation are conducted similarly to Part 1. Visualizations and performance metrics provide insights into the Bayesian model's ability to handle non-linearly separable data.
+
+   The project's ultimate goal is to provide a clear comparison between Linear Logistic Regression and Bayesian learning methods in scenarios of varying data separability. Contributors can experiment with different datasets, hyperparameters, and Bayesian learning variants to delve deeper into the strengths and limitations of these techniques. By undertaking this project, learners gain valuable insights into the trade-offs between linear and non-linear classification approaches, expanding their understanding of machine learning's applicability across diverse datasets.
+
+### MAP Classifier
+
+1. **Comparison of Normal Naive Bayes Classifier and Normal Full Bayes Classifier**
+   Description: This project engages in an insightful comparison between two distinct models utilizing a designated dataset. The project's primary objective is to evaluate and contrast the performance of two classifiers: the Naive Bayes classifier and the Full Bayes classifier. The Naive Bayes classifier adheres to the assumption that the joint probability of feature occurrences given a class follows a factorized form, treating each feature as independent. In contrast, the Full Bayes classifier does not impose this independence assumption. The project takes place in the fictional land of Randomistan, inhabited by the enigmatic Randomammal. The dataset includes records spanning 1000 days, encompassing temperature, humidity measurements, and the presence or absence of Randomammal sightings. The two researchers at the heart of this project are Bob and Alice. Bob, the more casual researcher, embraces the Naive Bayes classifier with its independence assumption, while Alice, driven by rigor, employs the Full Bayes classifier without assuming feature independence. Both researchers adopt the Normal distribution assumption for features. The dataset comprises two features, Temperature and Humidity, each accompanied by a binary label indicating whether the Randomammal was spotted. The comparison entails loading the training and testing data, converting them into numpy arrays, and evaluating the performances of the classifiers. The project serves as a comprehensive exploration into the implications of the independence assumption on classification accuracy, allowing a deeper understanding of how different modeling approaches impact predictive outcomes in this fictional realm of Randomistan.
+
+### Decision Trees
+
+1. **Data Preprocessing for Mushroom Classification**
+   Description: This project centers around preprocessing a mushroom dataset named agaricus-lepiota.csv containing information about hypothetical mushroom samples. The dataset encompasses 23 species of gilled mushrooms from the Agaricus and Lepiota Family. Each species is categorized as "edible," "poisonous," or "of unknown edibility and not recommended" (latter combined with "poisonous"). The dataset comprises 8124 observations with 21 distinct features. These features encompass various attributes such as cap shape, cap surface, cap color, presence of bruises, odor, gill characteristics, stalk properties, veil attributes, ring characteristics, spore print color, population, and habitat. The primary objective of this phase is to undertake initial data preprocessing steps to set the groundwork for subsequent analysis and modeling. Key tasks involve loading the dataset using the Pandas library's .read_csv method and then exploring the data to gain insights into its structure, features, and class distribution. Through these tasks, we aim to ensure data quality, address any format issues, and make the dataset ready for advanced analysis, visualization, and machine learning modeling.
